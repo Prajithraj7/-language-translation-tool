@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <div class="header-row">
+        <h1>Login</h1>
+        <a class="btn-link" href="/">Back</a>
+      </div>
+    </header>
+
+    <section class="controls">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="••••••••" />
+      </div>
+      <div class="actions">
+        <button id="loginBtn">Login</button>
+      </div>
+      <div id="status" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <script>
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const statusEl = document.getElementById('status');
+    function setStatus(m, e=false){ statusEl.textContent=m||''; statusEl.className=e?'status error':'status'; }
+    loginBtn.addEventListener('click', async ()=>{
+      setStatus('Logging in...');
+      try{
+        const resp = await fetch('/api/auth/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email.value.trim(), password: password.value }) });
+        const data = await resp.json();
+        if(!resp.ok) throw new Error(data?.error||'Login failed');
+        location.href = '/';
+      }catch(err){ setStatus(String(err?.message||err), true); }
+    });
+  </script>
+</body>
+</html>
+
+

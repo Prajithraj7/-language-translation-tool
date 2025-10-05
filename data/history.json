@@ -1,0 +1,18 @@
+{
+  "557eadeb-3aaf-4038-bd4a-05973925d849": [
+    {
+      "originalText": "hey there this is prajith",
+      "translatedText": "Bonjour, je m'appelle Prajith",
+      "targetLang": "FR",
+      "createdAt": "2025-10-05T15:40:54.964Z"
+    }
+  ],
+  "ace87dfb-af22-4b2c-8ba7-c168b4d4c8d1": [
+    {
+      "originalText": "Hey there this is nivashne.\nI love my boyfriend so much he is the best.",
+      "translatedText": "Bonjour, je m'appelle Nivashne.\nJ'aime tellement mon petit ami qu'il est le meilleur.",
+      "targetLang": "FR",
+      "createdAt": "2025-10-05T15:42:38.151Z"
+    }
+  ]
+}

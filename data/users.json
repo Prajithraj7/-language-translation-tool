@@ -1,0 +1,16 @@
+[
+  {
+    "id": "557eadeb-3aaf-4038-bd4a-05973925d849",
+    "email": "prajithraj2005@gmail.com",
+    "name": "Admin",
+    "passwordHash": "$2a$10$jrr.TVEDcaaXxy2YYsEECevjIQV1M/wHn2Lpz4ZLLpD0isNCPvffi",
+    "createdAt": "2025-10-05T15:40:08.667Z"
+  },
+  {
+    "id": "ace87dfb-af22-4b2c-8ba7-c168b4d4c8d1",
+    "email": "nivashne.2401147@srec.ac.in",
+    "name": "niva",
+    "passwordHash": "$2a$10$QrYsj6PRiXtaBznfz/rEWOJAnNnrrpVuxOncD6IxsoFvHatCDDfwC",
+    "createdAt": "2025-10-05T15:42:10.009Z"
+  }
+]

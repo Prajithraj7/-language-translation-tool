@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <div class="header-row">
+        <h1>Register</h1>
+        <a class="btn-link" href="/">Back</a>
+      </div>
+    </header>
+
+    <section class="controls">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" type="text" placeholder="Your name" />
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="••••••••" />
+      </div>
+      <div class="actions">
+        <button id="registerBtn">Create Account</button>
+      </div>
+      <div id="status" role="status" aria-live="polite"></div>
+    </section>
+  </div>
+
+  <script>
+    const nameEl = document.getElementById('name');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const registerBtn = document.getElementById('registerBtn');
+    const statusEl = document.getElementById('status');
+    function setStatus(m, e=false){ statusEl.textContent=m||''; statusEl.className=e?'status error':'status'; }
+    registerBtn.addEventListener('click', async ()=>{
+      setStatus('Registering...');
+      try{
+        const resp = await fetch('/api/auth/register',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: nameEl.value.trim(), email: email.value.trim(), password: password.value }) });
+        const data = await resp.json();
+        if(!resp.ok) throw new Error(data?.error||'Registration failed');
+        location.href = '/';
+      }catch(err){ setStatus(String(err?.message||err), true); }
+    });
+  </script>
+</body>
+</html>
+
+
