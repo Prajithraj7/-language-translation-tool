@@ -1,26 +1,26 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import fetch from 'node-fetch';
-
-dotenv.config();
 
 const app = express();
 
 // DeepL configuration
-const deeplEndpoint = (process.env.DEEPL_ENDPOINT || 'https://api-free.deepl.com').replace(/\/$/, '');
+const deeplEndpoint = 'https://api-free.deepl.com';
 const deeplApiKey = process.env.DEEPL_API_KEY || '';
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, message: 'Language Translation Tool API is running!' });
+  res.json({ 
+    ok: true, 
+    message: 'Language Translation Tool API is running!',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// DeepL languages (target languages)
+// DeepL languages
 app.get('/api/languages', async (req, res) => {
   try {
     if (!deeplApiKey) {
@@ -45,7 +45,7 @@ app.get('/api/languages', async (req, res) => {
   }
 });
 
-// Translate endpoint (DeepL)
+// Translate endpoint
 app.post('/api/translate', async (req, res) => {
   try {
     if (!deeplApiKey) {
@@ -86,7 +86,7 @@ app.post('/api/translate', async (req, res) => {
   }
 });
 
-// Simple auth endpoints (without file storage for now)
+// Simple auth endpoints
 app.post('/api/auth/register', (req, res) => {
   res.json({ message: 'Registration temporarily disabled for deployment' });
 });
@@ -107,9 +107,9 @@ app.get('/api/history', (req, res) => {
   res.json([]);
 });
 
-// Serve static files
-app.get('*', (req, res) => {
-  res.sendFile('public/index.html', { root: process.cwd() });
+// Root endpoint - serve the main page
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: process.cwd() });
 });
 
 // For Vercel

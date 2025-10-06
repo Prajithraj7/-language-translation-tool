@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Translation Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            color: #ecf0f1;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        h1 {
+            text-align: center;
+            color: #3498db;
+            margin-bottom: 30px;
+        }
+        .personal-banner {
+            text-align: center;
+            background: linear-gradient(45deg, #3498db, #6dd5ed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ecf0f1;
+            font-size: 16px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #34495e;
+            color: #ecf0f1;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #4a627a;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+        }
+        .success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+        }
+        .api-test {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(52, 73, 94, 0.3);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Language Translation Tool</h1>
+        <div class="personal-banner">Prajithraj R</div>
+        
+        <div class="form-group">
+            <label for="sourceLang">From Language:</label>
+            <select id="sourceLang">
+                <option value="auto">Auto-detect</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="targetLang">To Language:</label>
+            <select id="targetLang">
+                <option value="">Select language...</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="sourceText">Text to translate:</label>
+            <textarea id="sourceText" placeholder="Enter text to translate..."></textarea>
+        </div>
+        
+        <button onclick="translate()">Translate</button>
+        <button onclick="copyToClipboard()">Copy</button>
+        <button onclick="speakText()">Speak</button>
+        
+        <div class="form-group">
+            <label for="translatedText">Translation:</label>
+            <textarea id="translatedText" readonly placeholder="Translation will appear here..."></textarea>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div class="api-test">
+            <h3>API Status</h3>
+            <button onclick="testAPI()">Test API Connection</button>
+            <div id="apiStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        let languages = [];
+        
+        async function fetchLanguages() {
+            setStatus('Loading languages...');
+            try {
+                const resp = await fetch('/api/languages');
+                if (!resp.ok) throw new Error('Failed to load languages');
+                const data = await resp.json();
+                populateLanguageSelects(data);
+                setStatus('');
+            } catch (err) {
+                console.error(err);
+                setStatus('Could not load languages: ' + err.message, true);
+            }
+        }
+        
+        function populateLanguageSelects(languages) {
+            const sourceSelect = document.getElementById('sourceLang');
+            const targetSelect = document.getElementById('targetLang');
+            
+            // Add languages to both selects
+            languages.forEach(lang => {
+                const option1 = document.createElement('option');
+                option1.value = lang.language;
+                option1.textContent = `${lang.name} (${lang.language})`;
+                sourceSelect.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = lang.language;
+                option2.textContent = `${lang.name} (${lang.language})`;
+                targetSelect.appendChild(option2);
+            });
+            
+            // Set default target language
+            const enOption = targetSelect.querySelector('option[value="EN"]');
+            if (enOption) {
+                targetSelect.value = 'EN';
+            }
+        }
+        
+        async function translate() {
+            const text = document.getElementById('sourceText').value.trim();
+            const to = document.getElementById('targetLang').value;
+            
+            if (!text) {
+                setStatus('Please enter text to translate', true);
+                return;
+            }
+            if (!to) {
+                setStatus('Please select a target language', true);
+                return;
+            }
+            
+            setStatus('Translating...');
+            document.getElementById('translatedText').value = '';
+            
+            try {
+                const resp = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, to })
+                });
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.error || 'Translation failed');
+                }
+                document.getElementById('translatedText').value = data.translatedText || '';
+                setStatus('');
+            } catch (err) {
+                console.error(err);
+                setStatus('Translation failed: ' + err.message, true);
+            }
+        }
+        
+        async function copyToClipboard() {
+            const text = document.getElementById('translatedText').value;
+            if (!text) return;
+            
+            try {
+                await navigator.clipboard.writeText(text);
+                setStatus('Copied to clipboard!');
+                setTimeout(() => setStatus(''), 2000);
+            } catch (err) {
+                console.error('Copy failed:', err);
+                setStatus('Copy failed', true);
+            }
+        }
+        
+        function speakText() {
+            const text = document.getElementById('translatedText').value;
+            if (!text || !('speechSynthesis' in window)) return;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+        
+        async function testAPI() {
+            const statusDiv = document.getElementById('apiStatus');
+            statusDiv.innerHTML = 'Testing API...';
+            
+            try {
+                const resp = await fetch('/api/health');
+                const data = await resp.json();
+                statusDiv.innerHTML = `<div class="success">✅ API is working! ${data.message}</div>`;
+            } catch (err) {
+                statusDiv.innerHTML = `<div class="error">❌ API Error: ${err.message}</div>`;
+            }
+        }
+        
+        function setStatus(message, isError = false) {
+            const statusEl = document.getElementById('status');
+            if (!message) {
+                statusEl.style.display = 'none';
+                return;
+            }
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + (isError ? 'error' : 'success');
+            statusEl.style.display = 'block';
+        }
+        
+        // Initialize
+        fetchLanguages();
+        testAPI();
+    </script>
+</body>
+</html>
